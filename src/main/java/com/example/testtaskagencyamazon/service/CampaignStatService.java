@@ -45,11 +45,15 @@ public class CampaignStatService {
     for (SPCampaignReport report : reports) {
       Long campaignId = report.getCampaignId();
 
-      if(campaignAnalyticMap.containsKey(campaignId)) {
-        campaignAnalyticMap.get(campaignId).add(new SPCampaignStatistic(report));
-      } else {
-        campaignAnalyticMap.put(campaignId, new SPCampaignStatistic(report));
-      }
+      campaignAnalyticMap.computeIfAbsent(campaignId, k -> SPCampaignStatistic.createEmptyStatistic(
+              Long.parseLong(profileId),
+              Long.valueOf(report.getPortfolioId()),
+              endDate,
+              campaignId,
+              report.getCampaignName(),
+              report.getCampaignStatus()
+      ));
+      campaignAnalyticMap.computeIfPresent(campaignId, (key, value) -> value.add(new SPCampaignStatistic(report)));
     }
 
     // Get all enabled SP campaigns by profile and portfolio
